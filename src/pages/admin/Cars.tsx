@@ -14,11 +14,12 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import { EditIcon, DeleteIcon } from "@chakra-ui/icons";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const Cars = () => {
   const { colorMode } = useColorMode();
   const toast = useToast();
+  const navigate = useNavigate();
 
   // Örnek veri - Gerçek uygulamada API'den gelecek
   const cars = [
@@ -81,36 +82,23 @@ const Cars = () => {
               <Th>Yıl</Th>
               <Th>Günlük Fiyat</Th>
               <Th>Durum</Th>
-              <Th>İşlemler</Th>
             </Tr>
           </Thead>
           <Tbody>
             {cars.map((car) => (
-              <Tr key={car.id}>
+              <Tr
+                key={car.id}
+                onClick={() => navigate(`/admin/cars/edit/${car.id}`)}
+                _hover={{
+                  bg: colorMode === "light" ? "gray.50" : "gray.600",
+                  cursor: "pointer",
+                }}
+              >
                 <Td>{car.brand}</Td>
                 <Td>{car.model}</Td>
                 <Td>{car.year}</Td>
                 <Td>₺{car.price}</Td>
                 <Td>{car.status}</Td>
-                <Td>
-                  <HStack spacing={2}>
-                    <IconButton
-                      as={Link}
-                      to={`/admin/cars/edit/${car.id}`}
-                      aria-label="Düzenle"
-                      icon={<EditIcon />}
-                      size="sm"
-                      colorScheme="blue"
-                    />
-                    <IconButton
-                      aria-label="Sil"
-                      icon={<DeleteIcon />}
-                      size="sm"
-                      colorScheme="red"
-                      onClick={() => handleDelete(car.id)}
-                    />
-                  </HStack>
-                </Td>
               </Tr>
             ))}
           </Tbody>

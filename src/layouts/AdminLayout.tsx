@@ -41,7 +41,7 @@ const AdminLayout = () => {
   ];
 
   return (
-    <Flex h="100vh">
+    <Flex minH="100vh" bg={colorMode === "light" ? "gray.50" : "gray.900"}>
       {/* Sidebar */}
       <Box
         position="fixed"
@@ -83,6 +83,8 @@ const AdminLayout = () => {
         flex={1}
         ml={isSidebarOpen ? "250px" : "0"}
         transition="margin-left 0.3s ease-in-out"
+        bg={colorMode === "light" ? "gray.50" : "gray.900"}
+        minH="100vh"
       >
         {/* Header */}
         <HStack

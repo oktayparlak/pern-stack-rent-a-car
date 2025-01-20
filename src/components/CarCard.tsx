@@ -22,7 +22,7 @@ const CarCard = ({ id, brand, model, year, price, imageUrl }: CarCardProps) => {
   const navigate = useNavigate();
 
   const handleClick = () => {
-    navigate(`/car/${id}`);
+    navigate(`/cars/${id}`);
   };
 
   return (
@@ -78,7 +78,7 @@ const CarCard = ({ id, brand, model, year, price, imageUrl }: CarCardProps) => {
           mt="auto"
           onClick={(e) => {
             e.stopPropagation();
-            navigate(`/car/${id}`);
+            navigate(`/cars/${id}`);
           }}
         >
           Detayları Gör
