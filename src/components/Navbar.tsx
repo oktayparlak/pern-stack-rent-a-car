@@ -11,6 +11,7 @@ import {
   Container,
 } from "@chakra-ui/react";
 import { MoonIcon, SunIcon } from "@chakra-ui/icons";
+import { Link as RouterLink } from "react-router-dom";
 
 const Navbar = () => {
   const { colorMode, toggleColorMode } = useColorMode();
@@ -30,14 +31,18 @@ const Navbar = () => {
     >
       <Container maxW="container.xl" px={4}>
         <Flex alignItems="center" height="100%">
-          <Heading
-            size="md"
-            color={colorMode === "light" ? "blue.600" : "blue.200"}
-            cursor="pointer"
-            _hover={{ color: colorMode === "light" ? "blue.700" : "blue.300" }}
-          >
-            Araç Kiralama
-          </Heading>
+          <RouterLink to="/">
+            <Heading
+              size="md"
+              color={colorMode === "light" ? "blue.600" : "blue.200"}
+              cursor="pointer"
+              _hover={{
+                color: colorMode === "light" ? "blue.700" : "blue.300",
+              }}
+            >
+              Araç Kiralama
+            </Heading>
+          </RouterLink>
           <Spacer />
           <HStack spacing={4}>
             <Flex alignItems="center" gap={2}>
@@ -55,12 +60,16 @@ const Navbar = () => {
                 color={colorMode === "light" ? "gray.500" : "blue.200"}
               />
             </Flex>
-            <Button colorScheme="blue" variant="outline" size="md">
-              Giriş Yap
-            </Button>
-            <Button colorScheme="blue" size="md">
-              Üye Ol
-            </Button>
+            <RouterLink to="/login">
+              <Button colorScheme="blue" variant="outline" size="md">
+                Giriş Yap
+              </Button>
+            </RouterLink>
+            <RouterLink to="/register">
+              <Button colorScheme="blue" size="md">
+                Üye Ol
+              </Button>
+            </RouterLink>
           </HStack>
         </Flex>
       </Container>
