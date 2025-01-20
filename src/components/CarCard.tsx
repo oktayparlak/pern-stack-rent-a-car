@@ -6,8 +6,10 @@ import {
   VStack,
   useColorMode,
 } from "@chakra-ui/react";
+import { useNavigate } from "react-router-dom";
 
 interface CarCardProps {
+  id: number;
   brand: string;
   model: string;
   year: number;
@@ -15,8 +17,13 @@ interface CarCardProps {
   imageUrl: string;
 }
 
-const CarCard = ({ brand, model, year, price, imageUrl }: CarCardProps) => {
+const CarCard = ({ id, brand, model, year, price, imageUrl }: CarCardProps) => {
   const { colorMode } = useColorMode();
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    navigate(`/car/${id}`);
+  };
 
   return (
     <Box
@@ -27,11 +34,13 @@ const CarCard = ({ brand, model, year, price, imageUrl }: CarCardProps) => {
       _hover={{
         shadow: "xl",
         transform: "translateY(-2px)",
+        cursor: "pointer",
       }}
       transition="all 0.2s"
       height="100%"
       display="flex"
       flexDirection="column"
+      onClick={handleClick}
     >
       <Box position="relative" paddingTop="60%">
         <Image
@@ -63,8 +72,16 @@ const CarCard = ({ brand, model, year, price, imageUrl }: CarCardProps) => {
         >
           ₺{price} / gün
         </Text>
-        <Button colorScheme="blue" size="lg" mt="auto">
-          Kirala
+        <Button
+          colorScheme="blue"
+          size="lg"
+          mt="auto"
+          onClick={(e) => {
+            e.stopPropagation();
+            navigate(`/car/${id}`);
+          }}
+        >
+          Detayları Gör
         </Button>
       </VStack>
     </Box>

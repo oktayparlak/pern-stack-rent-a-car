@@ -62,6 +62,7 @@ const Home = () => {
           {sampleCars.map((car) => (
             <CarCard
               key={car.id}
+              id={car.id}
               brand={car.brand}
               model={car.model}
               year={car.year}
