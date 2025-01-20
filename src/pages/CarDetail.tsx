@@ -11,12 +11,52 @@ import {
   Badge,
   useColorMode,
   Divider,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+  ModalCloseButton,
+  FormControl,
+  FormLabel,
+  Input,
+  useToast,
 } from "@chakra-ui/react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 const CarDetail = () => {
   const { colorMode } = useColorMode();
   const { id } = useParams();
+  const navigate = useNavigate();
+  const toast = useToast();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [rentalDates, setRentalDates] = useState({
+    startDate: "",
+    endDate: "",
+  });
+
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setRentalDates(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleRent = () => {
+    // API çağrısı yapılacak
+    toast({
+      title: "Kiralama Başarılı",
+      description: "Araç başarıyla kiralandı. Kiralamalarım sayfasından takip edebilirsiniz.",
+      status: "success",
+      duration: 3000,
+      isClosable: true,
+    });
+    setIsModalOpen(false);
+    navigate("/my-rentals");
+  };
 
   // Örnek veri - Gerçek uygulamada API'den gelecek
   const carDetails = {
@@ -143,12 +183,65 @@ const CarDetail = () => {
               </Grid>
             </Box>
 
-            <Button colorScheme="blue" size="lg" mt={4}>
+            <Button colorScheme="blue" size="lg" mt={4} onClick={() => setIsModalOpen(true)}>
               Hemen Kirala
             </Button>
           </VStack>
         </Box>
       </Grid>
+
+      {/* Rental Modal */}
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Araç Kiralama</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <VStack spacing={4}>
+              <FormControl isRequired>
+                <FormLabel>Başlangıç Tarihi</FormLabel>
+                <Input
+                  type="date"
+                  name="startDate"
+                  value={rentalDates.startDate}
+                  onChange={handleDateChange}
+                  min={new Date().toISOString().split('T')[0]}
+                />
+              </FormControl>
+              <FormControl isRequired>
+                <FormLabel>Bitiş Tarihi</FormLabel>
+                <Input
+                  type="date"
+                  name="endDate"
+                  value={rentalDates.endDate}
+                  onChange={handleDateChange}
+                  min={rentalDates.startDate || new Date().toISOString().split('T')[0]}
+                />
+              </FormControl>
+              {rentalDates.startDate && rentalDates.endDate && (
+                <Box w="100%" p={4} bg={colorMode === "light" ? "gray.50" : "gray.700"} borderRadius="md">
+                  <Text fontWeight="bold">Toplam Tutar:</Text>
+                  <Text fontSize="xl" color={colorMode === "light" ? "blue.600" : "blue.200"}>
+                    ₺{carDetails.price * Math.ceil((new Date(rentalDates.endDate).getTime() - new Date(rentalDates.startDate).getTime()) / (1000 * 60 * 60 * 24))}
+                  </Text>
+                </Box>
+              )}
+            </VStack>
+          </ModalBody>
+          <ModalFooter>
+            <Button variant="ghost" mr={3} onClick={() => setIsModalOpen(false)}>
+              İptal
+            </Button>
+            <Button
+              colorScheme="blue"
+              onClick={handleRent}
+              isDisabled={!rentalDates.startDate || !rentalDates.endDate}
+            >
+              Kirala
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </Container>
   );
 };

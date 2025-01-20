@@ -17,7 +17,7 @@ import Profile from "./pages/Profile";
 function App() {
   const { colorMode } = useColorMode();
 
-  const PublicLayout = ({ children }) => (
+  const PublicLayout = ({ children }: { children: React.ReactNode }) => (
     <Box
       minH="100vh"
       display="flex"
