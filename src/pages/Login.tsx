@@ -10,14 +10,26 @@ import {
   Text,
   useColorMode,
   useToast,
+  Alert,
+  AlertIcon,
 } from "@chakra-ui/react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { useState } from "react";
+
+// Örnek kullanıcı bilgileri
+const ADMIN_USER = {
+  email: "admin@example.com",
+  password: "admin123",
+};
+
+const NORMAL_USER = {
+  email: "user@example.com",
+  password: "user123",
+};
 
 const Login = () => {
   const { colorMode } = useColorMode();
   const navigate = useNavigate();
-  const location = useLocation();
   const toast = useToast();
 
   const [formData, setFormData] = useState({
@@ -28,38 +40,50 @@ const Login = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Örnek admin kontrolü - Gerçek uygulamada API'den kontrol edilecek
+    // Admin girişi kontrolü
     if (
-      formData.email === "admin@example.com" &&
-      formData.password === "admin123"
+      formData.email === ADMIN_USER.email &&
+      formData.password === ADMIN_USER.password
     ) {
       localStorage.setItem("isAuthenticated", "true");
       localStorage.setItem("isAdmin", "true");
-
-      const from = location.state?.from?.pathname || "/admin";
-      navigate(from, { replace: true });
-
+      navigate("/admin");
       toast({
-        title: "Giriş başarılı",
+        title: "Giriş Başarılı",
         description: "Admin paneline yönlendiriliyorsunuz",
         status: "success",
-        duration: 2000,
+        duration: 3000,
         isClosable: true,
       });
-    } else {
-      // Normal kullanıcı girişi - Gerçek uygulamada API'den kontrol edilecek
+      return;
+    }
+
+    // Normal kullanıcı girişi kontrolü
+    if (
+      formData.email === NORMAL_USER.email &&
+      formData.password === NORMAL_USER.password
+    ) {
       localStorage.setItem("isAuthenticated", "true");
       localStorage.setItem("isAdmin", "false");
-
       navigate("/");
-
       toast({
-        title: "Giriş başarılı",
+        title: "Giriş Başarılı",
+        description: "Hoş geldiniz",
         status: "success",
-        duration: 2000,
+        duration: 3000,
         isClosable: true,
       });
+      return;
     }
+
+    // Hatalı giriş
+    toast({
+      title: "Giriş Başarısız",
+      description: "E-posta veya şifre hatalı",
+      status: "error",
+      duration: 3000,
+      isClosable: true,
+    });
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -71,55 +95,73 @@ const Login = () => {
   };
 
   return (
-    <Container maxW="container.sm">
-      <Box
-        p={8}
-        bg={colorMode === "light" ? "white" : "gray.700"}
-        borderRadius="lg"
-        boxShadow="lg"
-      >
-        <Stack spacing={6}>
-          <Heading textAlign="center">Giriş Yap</Heading>
+    <Box>
+      <Container maxW="container.sm" py={8}>
+        <Box
+          bg={colorMode === "light" ? "white" : "gray.700"}
+          p={8}
+          borderRadius="lg"
+          boxShadow="lg"
+        >
+          <Stack spacing={4}>
+            <Heading textAlign="center" mb={4}>
+              Giriş Yap
+            </Heading>
 
-          <Box as="form" onSubmit={handleSubmit}>
-            <Stack spacing={4}>
-              <FormControl isRequired>
-                <FormLabel>E-posta</FormLabel>
-                <Input
-                  name="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                />
-              </FormControl>
+            <Alert status="info" borderRadius="md">
+              <AlertIcon />
+              <Stack>
+                <Text>
+                  <strong>Admin Girişi:</strong> admin@example.com / admin123
+                </Text>
+                <Text>
+                  <strong>Normal Kullanıcı:</strong> user@example.com / user123
+                </Text>
+              </Stack>
+            </Alert>
 
-              <FormControl isRequired>
-                <FormLabel>Şifre</FormLabel>
-                <Input
-                  name="password"
-                  type="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                />
-              </FormControl>
+            <Box as="form" onSubmit={handleSubmit}>
+              <Stack spacing={4}>
+                <FormControl>
+                  <FormLabel>E-posta</FormLabel>
+                  <Input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                  />
+                </FormControl>
 
-              <Button type="submit" colorScheme="blue" size="lg">
-                Giriş Yap
-              </Button>
-            </Stack>
-          </Box>
+                <FormControl>
+                  <FormLabel>Şifre</FormLabel>
+                  <Input
+                    type="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    required
+                  />
+                </FormControl>
 
-          <Text textAlign="center">
-            Hesabınız yok mu?{" "}
-            <Link to="/register">
-              <Text as="span" color="blue.500">
-                Kayıt Ol
-              </Text>
-            </Link>
-          </Text>
-        </Stack>
-      </Box>
-    </Container>
+                <Button type="submit" colorScheme="blue" size="lg">
+                  Giriş Yap
+                </Button>
+
+                <Text textAlign="center">
+                  Hesabınız yok mu?{" "}
+                  <RouterLink to="/register">
+                    <Text as="span" color="blue.500">
+                      Kayıt Ol
+                    </Text>
+                  </RouterLink>
+                </Text>
+              </Stack>
+            </Box>
+          </Stack>
+        </Box>
+      </Container>
+    </Box>
   );
 };
 

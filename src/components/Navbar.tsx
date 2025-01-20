@@ -1,75 +1,108 @@
 import {
   Box,
-  Button,
-  Flex,
-  Heading,
-  Spacer,
-  useColorMode,
-  Switch,
-  HStack,
-  Icon,
   Container,
+  Flex,
+  Button,
+  useColorMode,
+  IconButton,
+  Menu,
+  MenuButton,
+  MenuList,
+  MenuItem,
+  Avatar,
+  Text,
+  HStack,
+  Link,
+  useToast,
 } from "@chakra-ui/react";
-import { MoonIcon, SunIcon } from "@chakra-ui/icons";
-import { Link as RouterLink } from "react-router-dom";
+import { MoonIcon, SunIcon, ChevronDownIcon } from "@chakra-ui/icons";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
 
 const Navbar = () => {
   const { colorMode, toggleColorMode } = useColorMode();
+  const navigate = useNavigate();
+  const toast = useToast();
+
+  const isAuthenticated = localStorage.getItem("isAuthenticated") === "true";
+  const isAdmin = localStorage.getItem("isAdmin") === "true";
+
+  const handleLogout = () => {
+    localStorage.removeItem("isAuthenticated");
+    localStorage.removeItem("isAdmin");
+    navigate("/login");
+    toast({
+      title: "Çıkış Yapıldı",
+      status: "success",
+      duration: 3000,
+      isClosable: true,
+    });
+  };
 
   return (
     <Box
       as="nav"
-      bg={colorMode === "light" ? "white" : "gray.900"}
+      bg={colorMode === "light" ? "white" : "gray.800"}
       py={4}
-      shadow="sm"
+      borderBottom="1px"
+      borderColor={colorMode === "light" ? "gray.200" : "gray.700"}
       position="sticky"
       top={0}
       zIndex={1000}
-      width="100%"
-      borderBottom="1px"
-      borderColor={colorMode === "light" ? "gray.200" : "gray.700"}
     >
-      <Container maxW="container.xl" px={4}>
-        <Flex alignItems="center" height="100%">
-          <RouterLink to="/">
-            <Heading
-              size="md"
-              color={colorMode === "light" ? "blue.600" : "blue.200"}
-              cursor="pointer"
-              _hover={{
-                color: colorMode === "light" ? "blue.700" : "blue.300",
-              }}
-            >
-              Araç Kiralama
-            </Heading>
-          </RouterLink>
-          <Spacer />
+      <Container maxW="container.xl">
+        <Flex justify="space-between" align="center">
+          <Link
+            as={RouterLink}
+            to="/"
+            fontSize="xl"
+            fontWeight="bold"
+            _hover={{ textDecoration: "none" }}
+          >
+            Rent A Car
+          </Link>
+
           <HStack spacing={4}>
-            <Flex alignItems="center" gap={2}>
-              <Icon
-                as={SunIcon}
-                color={colorMode === "light" ? "orange.500" : "gray.500"}
-              />
-              <Switch
-                colorScheme="blue"
-                isChecked={colorMode === "dark"}
-                onChange={toggleColorMode}
-              />
-              <Icon
-                as={MoonIcon}
-                color={colorMode === "light" ? "gray.500" : "blue.200"}
-              />
-            </Flex>
-            <RouterLink to="/login">
-              <Button colorScheme="blue" variant="outline" size="md">
-                Giriş Yap
-              </Button>
-            </RouterLink>
-            <RouterLink to="/register">
-              <Button colorScheme="blue" size="md">
-                Üye Ol
-              </Button>
-            </RouterLink>
+            <IconButton
+              icon={colorMode === "light" ? <MoonIcon /> : <SunIcon />}
+              onClick={toggleColorMode}
+              aria-label="Toggle color mode"
+              variant="ghost"
+            />
+
+            {isAuthenticated ? (
+              <Menu>
+                <MenuButton
+                  as={Button}
+                  rightIcon={<ChevronDownIcon />}
+                  variant="ghost"
+                >
+                  <Avatar size="sm" name="User" bg="blue.500" color="white" />
+                </MenuButton>
+                <MenuList>
+                  {isAdmin ? (
+                    <MenuItem onClick={() => navigate("/admin")}>
+                      Admin Panel
+                    </MenuItem>
+                  ) : (
+                    <MenuItem onClick={() => navigate("/my-rentals")}>
+                      Kiralamalarım
+                    </MenuItem>
+                  )}
+                  <MenuItem onClick={() => navigate("/profile")}>
+                    Profil
+                  </MenuItem>
+                  <MenuItem onClick={handleLogout}>Çıkış Yap</MenuItem>
+                </MenuList>
+              </Menu>
+            ) : (
+              <Link
+                as={RouterLink}
+                to="/login"
+                _hover={{ textDecoration: "none", color: "white" }}
+              >
+                <Button colorScheme="blue">Giriş Yap</Button>
+              </Link>
+            )}
           </HStack>
         </Flex>
       </Container>

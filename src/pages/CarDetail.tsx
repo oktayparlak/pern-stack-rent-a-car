@@ -48,7 +48,7 @@ const CarDetail = () => {
   };
 
   return (
-    <Box>
+    <Container maxW="container.xl" py={8}>
       <Grid
         templateColumns={{ base: "1fr", lg: "3fr 2fr" }}
         gap={6}
@@ -149,7 +149,7 @@ const CarDetail = () => {
           </VStack>
         </Box>
       </Grid>
-    </Box>
+    </Container>
   );
 };
 

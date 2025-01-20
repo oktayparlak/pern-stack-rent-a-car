@@ -2,9 +2,13 @@ import { Navigate, useLocation } from "react-router-dom";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
+  requireAdmin?: boolean;
 }
 
-const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
+const ProtectedRoute = ({
+  children,
+  requireAdmin = false,
+}: ProtectedRouteProps) => {
   const location = useLocation();
 
   // Burada gerçek uygulamada bir authentication servisi kullanılacak
@@ -15,7 +19,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  if (!isAdmin) {
+  if (requireAdmin && !isAdmin) {
     return <Navigate to="/" replace />;
   }
 
