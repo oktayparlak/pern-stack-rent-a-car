@@ -45,7 +45,16 @@ const Home = () => {
 
   return (
     <Box flex="1" overflow="auto" py={8}>
-      <Container maxW="container.xl" h="full">
+      <Container
+        maxW="container.xl"
+        h="full"
+        bg={colorMode === "light" ? "gray.100" : "gray.700"}
+        borderRadius="xl"
+        p={8}
+        boxShadow="lg"
+        borderWidth="1px"
+        borderColor={colorMode === "light" ? "gray.200" : "gray.600"}
+      >
         <Heading mb={6} color={colorMode === "light" ? "gray.800" : "white"}>
           Kiralık Araçlar
         </Heading>
