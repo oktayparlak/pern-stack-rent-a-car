@@ -8,10 +8,11 @@ import {
   Text,
   useColorMode,
   useToast,
+  Link,
 } from "@chakra-ui/react";
 import { HamburgerIcon, MoonIcon, SunIcon } from "@chakra-ui/icons";
 import { useState } from "react";
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet, useNavigate, Link as RouterLink } from "react-router-dom";
 
 const AdminLayout = () => {
   const { colorMode, toggleColorMode } = useColorMode();
@@ -98,6 +99,11 @@ const AdminLayout = () => {
           />
 
           <HStack spacing={4}>
+            <Link as={RouterLink} to="/" _hover={{ textDecoration: "none" }}>
+              <Button variant="ghost" colorScheme="blue">
+                Siteye Dön
+              </Button>
+            </Link>
             <IconButton
               icon={colorMode === "light" ? <MoonIcon /> : <SunIcon />}
               onClick={toggleColorMode}
