@@ -29,6 +29,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { vehicleService, Vehicle } from "../services/vehicle.service";
+import { bookingService } from "../services/booking.service";
 
 const CarDetail = () => {
   const { colorMode } = useColorMode();
@@ -149,18 +150,47 @@ const CarDetail = () => {
     setIsModalOpen(true);
   };
 
-  const handleRent = () => {
-    // API çağrısı yapılacak
-    toast({
-      title: "Kiralama Başarılı",
-      description:
-        "Araç başarıyla kiralandı. Kiralamalarım sayfasından takip edebilirsiniz.",
-      status: "success",
-      duration: 3000,
-      isClosable: true,
-    });
-    setIsModalOpen(false);
-    navigate("/my-rentals");
+  const handleRent = async () => {
+    if (!vehicle?.id || !rentalDates.startDate || !rentalDates.endDate) {
+      toast({
+        title: "Hata",
+        description: "Lütfen tüm alanları doldurun",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+        position: "bottom",
+      });
+      return;
+    }
+
+    try {
+      await bookingService.createBooking({
+        vehicleId: vehicle.id,
+        startDate: rentalDates.startDate,
+        endDate: rentalDates.endDate,
+      });
+
+      toast({
+        title: "Kiralama Başarılı",
+        description:
+          "Araç başarıyla kiralandı. Kiralamalarım sayfasından takip edebilirsiniz.",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+        position: "bottom",
+      });
+      setIsModalOpen(false);
+      navigate("/my-rentals");
+    } catch (error) {
+      toast({
+        title: "Kiralama Başarısız",
+        description: error instanceof Error ? error.message : "Bir hata oluştu",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+        position: "bottom",
+      });
+    }
   };
 
   if (isLoading) {
