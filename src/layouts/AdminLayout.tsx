@@ -12,13 +12,38 @@ import {
 } from "@chakra-ui/react";
 import { HamburgerIcon, MoonIcon, SunIcon } from "@chakra-ui/icons";
 import { useState } from "react";
-import { Outlet, useNavigate, Link as RouterLink } from "react-router-dom";
+import {
+  Outlet,
+  useNavigate,
+  Link as RouterLink,
+  useLocation,
+} from "react-router-dom";
+import { FiHome, FiTruck, FiCalendar } from "react-icons/fi";
 
 const AdminLayout = () => {
   const { colorMode, toggleColorMode } = useColorMode();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const navigate = useNavigate();
+  const location = useLocation();
   const toast = useToast();
+
+  const menuItems = [
+    {
+      name: "Dashboard",
+      icon: FiHome,
+      path: "/admin",
+    },
+    {
+      name: "Araçlar",
+      icon: FiTruck,
+      path: "/admin/cars",
+    },
+    {
+      name: "Kiralamalar",
+      icon: FiCalendar,
+      path: "/admin/bookings",
+    },
+  ];
 
   const handleLogout = () => {
     localStorage.removeItem("isAuthenticated");
@@ -54,21 +79,40 @@ const AdminLayout = () => {
             </Text>
           </Box>
 
-          <Button
-            variant="ghost"
-            justifyContent="flex-start"
-            mb={2}
-            onClick={() => navigate("/admin")}
-          >
-            Dashboard
-          </Button>
-          <Button
-            variant="ghost"
-            justifyContent="flex-start"
-            onClick={() => navigate("/admin/cars")}
-          >
-            Araçlar
-          </Button>
+          {menuItems.map((item) => {
+            const isActive = location.pathname === item.path;
+            return (
+              <Button
+                key={item.path}
+                variant="ghost"
+                justifyContent="flex-start"
+                mb={2}
+                onClick={() => navigate(item.path)}
+                bg={
+                  isActive
+                    ? colorMode === "light"
+                      ? "gray.100"
+                      : "gray.700"
+                    : "transparent"
+                }
+                color={
+                  isActive
+                    ? colorMode === "light"
+                      ? "blue.500"
+                      : "blue.200"
+                    : undefined
+                }
+                _hover={{
+                  bg: colorMode === "light" ? "gray.100" : "gray.700",
+                }}
+              >
+                <HStack spacing={3}>
+                  <Icon as={item.icon} boxSize={5} />
+                  <Text>{item.name}</Text>
+                </HStack>
+              </Button>
+            );
+          })}
         </Flex>
       </Box>
 

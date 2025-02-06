@@ -10,6 +10,7 @@ import Dashboard from "./pages/admin/Dashboard";
 import Cars from "./pages/admin/Cars";
 import NewCar from "./pages/admin/NewCar";
 import EditCar from "./pages/admin/EditCar";
+import Bookings from "./pages/admin/Bookings";
 import ProtectedRoute from "./components/ProtectedRoute";
 import MyRentals from "./pages/MyRentals";
 import Profile from "./pages/Profile";
@@ -51,6 +52,7 @@ function App() {
         <Route path="cars" element={<Cars />} />
         <Route path="cars/new" element={<NewCar />} />
         <Route path="cars/edit/:id" element={<EditCar />} />
+        <Route path="bookings" element={<Bookings />} />
       </Route>
 
       {/* Protected User Routes */}

@@ -13,9 +13,10 @@ import {
   Text,
 } from "@chakra-ui/react";
 import { useAuth } from "../hooks/useAuth";
+import { userService } from "../services/user.service";
 
 const Profile = () => {
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
   const toast = useToast();
   const [isProfileLoading, setIsProfileLoading] = useState(false);
   const [isPasswordLoading, setIsPasswordLoading] = useState(false);
@@ -63,7 +64,10 @@ const Profile = () => {
     setIsProfileLoading(true);
 
     try {
-      // TODO: API'ye profil güncelleme isteği gönderilecek
+      const updatedUser = await userService.updateProfile(profileData);
+      // AuthContext'teki user state'ini güncelle
+      updateUser(updatedUser);
+
       toast({
         title: "Profil güncellendi",
         status: "success",

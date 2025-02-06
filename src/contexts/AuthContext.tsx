@@ -22,6 +22,7 @@ interface AuthContextType {
     password: string
   ) => Promise<void>;
   logout: () => void;
+  updateUser: (user: User) => void;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -85,13 +86,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     localStorage.removeItem("token");
   };
 
+  const updateUser = (updatedUser: User) => {
+    setUser(updatedUser);
+  };
+
   if (isLoading) {
     return null; // veya bir loading spinner gösterebilirsiniz
   }
 
   return (
     <AuthContext.Provider
-      value={{ user, token, isAdmin, isLoading, login, register, logout }}
+      value={{
+        user,
+        token,
+        isAdmin,
+        isLoading,
+        login,
+        register,
+        logout,
+        updateUser,
+      }}
     >
       {children}
     </AuthContext.Provider>
