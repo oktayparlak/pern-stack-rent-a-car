@@ -1,5 +1,5 @@
-import { Box, Container, useColorMode } from "@chakra-ui/react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { Box, useColorMode } from "@chakra-ui/react";
+import { Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
@@ -37,80 +37,78 @@ function App() {
   );
 
   return (
-    <Router>
-      <Routes>
-        {/* Admin Routes */}
-        <Route
-          path="/admin"
-          element={
-            <ProtectedRoute requireAdmin>
-              <AdminLayout />
-            </ProtectedRoute>
-          }
-        >
-          <Route index element={<Dashboard />} />
-          <Route path="cars" element={<Cars />} />
-          <Route path="cars/new" element={<NewCar />} />
-          <Route path="cars/edit/:id" element={<EditCar />} />
-        </Route>
+    <Routes>
+      {/* Admin Routes */}
+      <Route
+        path="/admin"
+        element={
+          <ProtectedRoute requireAdmin>
+            <AdminLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<Dashboard />} />
+        <Route path="cars" element={<Cars />} />
+        <Route path="cars/new" element={<NewCar />} />
+        <Route path="cars/edit/:id" element={<EditCar />} />
+      </Route>
 
-        {/* Protected User Routes */}
-        <Route
-          path="/my-rentals"
-          element={
-            <ProtectedRoute>
-              <PublicLayout>
-                <MyRentals />
-              </PublicLayout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/profile"
-          element={
-            <ProtectedRoute>
-              <PublicLayout>
-                <Profile />
-              </PublicLayout>
-            </ProtectedRoute>
-          }
-        />
+      {/* Protected User Routes */}
+      <Route
+        path="/my-rentals"
+        element={
+          <ProtectedRoute>
+            <PublicLayout>
+              <MyRentals />
+            </PublicLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <PublicLayout>
+              <Profile />
+            </PublicLayout>
+          </ProtectedRoute>
+        }
+      />
 
-        {/* Public Routes */}
-        <Route
-          path="/"
-          element={
-            <PublicLayout>
-              <Home />
-            </PublicLayout>
-          }
-        />
-        <Route
-          path="/login"
-          element={
-            <PublicLayout>
-              <Login />
-            </PublicLayout>
-          }
-        />
-        <Route
-          path="/register"
-          element={
-            <PublicLayout>
-              <Register />
-            </PublicLayout>
-          }
-        />
-        <Route
-          path="/cars/:id"
-          element={
-            <PublicLayout>
-              <CarDetail />
-            </PublicLayout>
-          }
-        />
-      </Routes>
-    </Router>
+      {/* Public Routes */}
+      <Route
+        path="/"
+        element={
+          <PublicLayout>
+            <Home />
+          </PublicLayout>
+        }
+      />
+      <Route
+        path="/login"
+        element={
+          <PublicLayout>
+            <Login />
+          </PublicLayout>
+        }
+      />
+      <Route
+        path="/register"
+        element={
+          <PublicLayout>
+            <Register />
+          </PublicLayout>
+        }
+      />
+      <Route
+        path="/car/:id"
+        element={
+          <PublicLayout>
+            <CarDetail />
+          </PublicLayout>
+        }
+      />
+    </Routes>
   );
 }
 

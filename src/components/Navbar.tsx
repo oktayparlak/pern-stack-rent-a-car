@@ -17,18 +17,16 @@ import {
 } from "@chakra-ui/react";
 import { MoonIcon, SunIcon, ChevronDownIcon } from "@chakra-ui/icons";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 
 const Navbar = () => {
   const { colorMode, toggleColorMode } = useColorMode();
   const navigate = useNavigate();
   const toast = useToast();
-
-  const isAuthenticated = localStorage.getItem("isAuthenticated") === "true";
-  const isAdmin = localStorage.getItem("isAdmin") === "true";
+  const { user, logout } = useAuth();
 
   const handleLogout = () => {
-    localStorage.removeItem("isAuthenticated");
-    localStorage.removeItem("isAdmin");
+    logout();
     navigate("/login");
     toast({
       title: "Çıkış Yapıldı",
@@ -69,25 +67,29 @@ const Navbar = () => {
               variant="ghost"
             />
 
-            {isAuthenticated ? (
+            {user ? (
               <Menu>
                 <MenuButton
                   as={Button}
                   rightIcon={<ChevronDownIcon />}
                   variant="ghost"
                 >
-                  <Avatar size="sm" name="User" bg="blue.500" color="white" />
+                  <HStack>
+                    <Avatar
+                      size="sm"
+                      name={`${user.firstName} ${user.lastName}`}
+                      bg="blue.500"
+                      color="white"
+                    />
+                    <Text display={{ base: "none", md: "block" }}>
+                      {user.firstName} {user.lastName}
+                    </Text>
+                  </HStack>
                 </MenuButton>
                 <MenuList>
-                  {isAdmin ? (
-                    <MenuItem onClick={() => navigate("/admin")}>
-                      Admin Panel
-                    </MenuItem>
-                  ) : (
-                    <MenuItem onClick={() => navigate("/my-rentals")}>
-                      Kiralamalarım
-                    </MenuItem>
-                  )}
+                  <MenuItem onClick={() => navigate("/my-rentals")}>
+                    Kiralamalarım
+                  </MenuItem>
                   <MenuItem onClick={() => navigate("/profile")}>
                     Profil
                   </MenuItem>
@@ -98,7 +100,7 @@ const Navbar = () => {
               <Link
                 as={RouterLink}
                 to="/login"
-                _hover={{ textDecoration: "none", color: "white" }}
+                _hover={{ textDecoration: "none" }}
               >
                 <Button colorScheme="blue">Giriş Yap</Button>
               </Link>

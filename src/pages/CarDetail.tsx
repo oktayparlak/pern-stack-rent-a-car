@@ -25,12 +25,14 @@ import {
 } from "@chakra-ui/react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { useAuth } from "../contexts/AuthContext";
 
 const CarDetail = () => {
   const { colorMode } = useColorMode();
   const { id } = useParams();
   const navigate = useNavigate();
   const toast = useToast();
+  const { isAuthenticated } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [rentalDates, setRentalDates] = useState({
     startDate: "",
@@ -39,10 +41,87 @@ const CarDetail = () => {
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+
+    // Bugünün tarihini al
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Seçilen tarihi al
+    const selectedDate = new Date(value);
+    selectedDate.setHours(0, 0, 0, 0);
+
+    // Başlangıç tarihi için kontrol
+    if (name === "startDate") {
+      if (selectedDate < today) {
+        toast({
+          title: "Hata",
+          description: "Geçmiş bir tarih seçemezsiniz",
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
+        return;
+      }
+      // Eğer bitiş tarihi varsa ve seçilen başlangıç tarihi bitiş tarihinden büyükse
+      if (rentalDates.endDate && selectedDate > new Date(rentalDates.endDate)) {
+        toast({
+          title: "Hata",
+          description: "Başlangıç tarihi, bitiş tarihinden büyük olamaz",
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
+        return;
+      }
+    }
+
+    // Bitiş tarihi için kontrol
+    if (name === "endDate") {
+      if (selectedDate < today) {
+        toast({
+          title: "Hata",
+          description: "Geçmiş bir tarih seçemezsiniz",
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
+        return;
+      }
+      // Eğer başlangıç tarihi varsa ve seçilen bitiş tarihi başlangıç tarihinden küçükse
+      if (
+        rentalDates.startDate &&
+        selectedDate < new Date(rentalDates.startDate)
+      ) {
+        toast({
+          title: "Hata",
+          description: "Bitiş tarihi, başlangıç tarihinden küçük olamaz",
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
+        return;
+      }
+    }
+
     setRentalDates((prev) => ({
       ...prev,
       [name]: value,
     }));
+  };
+
+  const handleRentClick = () => {
+    if (!isAuthenticated) {
+      toast({
+        title: "Giriş Gerekli",
+        description: "Araç kiralamak için lütfen giriş yapın",
+        status: "warning",
+        duration: 3000,
+        isClosable: true,
+      });
+      navigate("/login", { state: { from: `/car/${id}` } });
+      return;
+    }
+    setIsModalOpen(true);
   };
 
   const handleRent = () => {
@@ -61,7 +140,7 @@ const CarDetail = () => {
 
   // Örnek veri - Gerçek uygulamada API'den gelecek
   const carDetails = {
-    id: 1,
+    id: Number(id),
     brand: "BMW",
     model: "3 Serisi",
     year: 2023,
@@ -188,7 +267,7 @@ const CarDetail = () => {
               colorScheme="blue"
               size="lg"
               mt={4}
-              onClick={() => setIsModalOpen(true)}
+              onClick={handleRentClick}
             >
               Hemen Kirala
             </Button>
@@ -196,79 +275,81 @@ const CarDetail = () => {
         </Box>
       </Grid>
 
-      {/* Rental Modal */}
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Araç Kiralama</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
-            <VStack spacing={4}>
-              <FormControl isRequired>
-                <FormLabel>Başlangıç Tarihi</FormLabel>
-                <Input
-                  type="date"
-                  name="startDate"
-                  value={rentalDates.startDate}
-                  onChange={handleDateChange}
-                  min={new Date().toISOString().split("T")[0]}
-                />
-              </FormControl>
-              <FormControl isRequired>
-                <FormLabel>Bitiş Tarihi</FormLabel>
-                <Input
-                  type="date"
-                  name="endDate"
-                  value={rentalDates.endDate}
-                  onChange={handleDateChange}
-                  min={
-                    rentalDates.startDate ||
-                    new Date().toISOString().split("T")[0]
-                  }
-                />
-              </FormControl>
-              {rentalDates.startDate && rentalDates.endDate && (
-                <Box
-                  w="100%"
-                  p={4}
-                  bg={colorMode === "light" ? "gray.50" : "gray.700"}
-                  borderRadius="md"
-                >
-                  <Text fontWeight="bold">Toplam Tutar:</Text>
-                  <Text
-                    fontSize="xl"
-                    color={colorMode === "light" ? "blue.600" : "blue.200"}
+      {/* Rental Modal - Sadece giriş yapmış kullanıcılar için gösterilir */}
+      {isAuthenticated && (
+        <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+          <ModalOverlay />
+          <ModalContent>
+            <ModalHeader>Araç Kiralama</ModalHeader>
+            <ModalCloseButton />
+            <ModalBody>
+              <VStack spacing={4}>
+                <FormControl isRequired>
+                  <FormLabel>Başlangıç Tarihi</FormLabel>
+                  <Input
+                    type="date"
+                    name="startDate"
+                    value={rentalDates.startDate}
+                    onChange={handleDateChange}
+                    min={new Date().toISOString().split("T")[0]}
+                  />
+                </FormControl>
+                <FormControl isRequired>
+                  <FormLabel>Bitiş Tarihi</FormLabel>
+                  <Input
+                    type="date"
+                    name="endDate"
+                    value={rentalDates.endDate}
+                    onChange={handleDateChange}
+                    min={
+                      rentalDates.startDate ||
+                      new Date().toISOString().split("T")[0]
+                    }
+                  />
+                </FormControl>
+                {rentalDates.startDate && rentalDates.endDate && (
+                  <Box
+                    w="100%"
+                    p={4}
+                    bg={colorMode === "light" ? "gray.50" : "gray.700"}
+                    borderRadius="md"
                   >
-                    ₺
-                    {carDetails.price *
-                      Math.ceil(
-                        (new Date(rentalDates.endDate).getTime() -
-                          new Date(rentalDates.startDate).getTime()) /
-                          (1000 * 60 * 60 * 24)
-                      )}
-                  </Text>
-                </Box>
-              )}
-            </VStack>
-          </ModalBody>
-          <ModalFooter>
-            <Button
-              variant="ghost"
-              mr={3}
-              onClick={() => setIsModalOpen(false)}
-            >
-              İptal
-            </Button>
-            <Button
-              colorScheme="blue"
-              onClick={handleRent}
-              isDisabled={!rentalDates.startDate || !rentalDates.endDate}
-            >
-              Kirala
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+                    <Text fontWeight="bold">Toplam Tutar:</Text>
+                    <Text
+                      fontSize="xl"
+                      color={colorMode === "light" ? "blue.600" : "blue.200"}
+                    >
+                      ₺
+                      {carDetails.price *
+                        Math.ceil(
+                          (new Date(rentalDates.endDate).getTime() -
+                            new Date(rentalDates.startDate).getTime()) /
+                            (1000 * 60 * 60 * 24)
+                        )}
+                    </Text>
+                  </Box>
+                )}
+              </VStack>
+            </ModalBody>
+            <ModalFooter>
+              <Button
+                variant="ghost"
+                mr={3}
+                onClick={() => setIsModalOpen(false)}
+              >
+                İptal
+              </Button>
+              <Button
+                colorScheme="blue"
+                onClick={handleRent}
+                isDisabled={!rentalDates.startDate || !rentalDates.endDate}
+              >
+                Kirala
+              </Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
+      )}
     </Container>
   );
 };

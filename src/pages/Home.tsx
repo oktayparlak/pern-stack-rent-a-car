@@ -67,9 +67,99 @@ const sampleCars = [
     imageUrl:
       "https://images.unsplash.com/photo-1617531653332-bd46c24f2068?auto=format&fit=crop&w=800",
   },
+  {
+    id: 7,
+    brand: "Audi",
+    model: "A6",
+    year: 2023,
+    price: 2200,
+    imageUrl:
+      "https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?auto=format&fit=crop&w=800",
+  },
+  {
+    id: 8,
+    brand: "BMW",
+    model: "7 Serisi",
+    year: 2023,
+    price: 2500,
+    imageUrl:
+      "https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=800",
+  },
+  {
+    id: 9,
+    brand: "Mercedes",
+    model: "S Serisi",
+    year: 2023,
+    price: 3000,
+    imageUrl:
+      "https://images.unsplash.com/photo-1617531653332-bd46c24f2068?auto=format&fit=crop&w=800",
+  },
+  {
+    id: 10,
+    brand: "Audi",
+    model: "Q7",
+    year: 2023,
+    price: 2800,
+    imageUrl:
+      "https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?auto=format&fit=crop&w=800",
+  },
+  {
+    id: 11,
+    brand: "Volkswagen",
+    model: "Arteon",
+    year: 2023,
+    price: 1800,
+    imageUrl:
+      "https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?auto=format&fit=crop&w=800",
+  },
+  {
+    id: 12,
+    brand: "BMW",
+    model: "X5",
+    year: 2023,
+    price: 2700,
+    imageUrl:
+      "https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=800",
+  },
+  {
+    id: 13,
+    brand: "Mercedes",
+    model: "GLE",
+    year: 2023,
+    price: 2600,
+    imageUrl:
+      "https://images.unsplash.com/photo-1617531653332-bd46c24f2068?auto=format&fit=crop&w=800",
+  },
+  {
+    id: 14,
+    brand: "Audi",
+    model: "Q5",
+    year: 2023,
+    price: 2400,
+    imageUrl:
+      "https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?auto=format&fit=crop&w=800",
+  },
+  {
+    id: 15,
+    brand: "Volkswagen",
+    model: "Tiguan",
+    year: 2023,
+    price: 1900,
+    imageUrl:
+      "https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?auto=format&fit=crop&w=800",
+  },
+  {
+    id: 16,
+    brand: "BMW",
+    model: "X3",
+    year: 2023,
+    price: 2300,
+    imageUrl:
+      "https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=800",
+  },
 ];
 
-const ITEMS_PER_PAGE = 4;
+const ITEMS_PER_PAGE = 8;
 
 const Home = () => {
   const { colorMode } = useColorMode();
@@ -102,9 +192,9 @@ const Home = () => {
         <Grid
           templateColumns={{
             base: "1fr",
-            md: "repeat(2, 1fr)",
-            lg: "repeat(2, 1fr)",
-            xl: "repeat(4, 1fr)",
+            sm: "repeat(2, 1fr)",
+            md: "repeat(3, 1fr)",
+            lg: "repeat(4, 1fr)",
           }}
           gap={6}
           pb={8}

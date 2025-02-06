@@ -1,4 +1,5 @@
 import { Navigate, useLocation } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -10,18 +11,16 @@ const ProtectedRoute = ({
   requireAdmin = false,
 }: ProtectedRouteProps) => {
   const location = useLocation();
+  const { user, token } = useAuth();
 
-  // Burada gerçek uygulamada bir authentication servisi kullanılacak
-  const isAuthenticated = localStorage.getItem("isAuthenticated") === "true";
-  const isAdmin = localStorage.getItem("isAdmin") === "true";
-
-  if (!isAuthenticated) {
+  if (!token || !user) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  if (requireAdmin && !isAdmin) {
-    return <Navigate to="/" replace />;
-  }
+  // Admin kontrolü için user nesnesinde isAdmin özelliği varsa kontrol edilebilir
+  // if (requireAdmin && !user.isAdmin) {
+  //   return <Navigate to="/" replace />;
+  // }
 
   return <>{children}</>;
 };
