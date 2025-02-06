@@ -25,14 +25,14 @@ import {
 } from "@chakra-ui/react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "../hooks/useAuth";
 
 const CarDetail = () => {
   const { colorMode } = useColorMode();
   const { id } = useParams();
   const navigate = useNavigate();
   const toast = useToast();
-  const { isAuthenticated } = useAuth();
+  const { user } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [rentalDates, setRentalDates] = useState({
     startDate: "",
@@ -110,15 +110,8 @@ const CarDetail = () => {
   };
 
   const handleRentClick = () => {
-    if (!isAuthenticated) {
-      toast({
-        title: "Giriş Gerekli",
-        description: "Araç kiralamak için lütfen giriş yapın",
-        status: "warning",
-        duration: 3000,
-        isClosable: true,
-      });
-      navigate("/login", { state: { from: `/car/${id}` } });
+    if (!user) {
+      navigate("/login");
       return;
     }
     setIsModalOpen(true);
@@ -276,7 +269,7 @@ const CarDetail = () => {
       </Grid>
 
       {/* Rental Modal - Sadece giriş yapmış kullanıcılar için gösterilir */}
-      {isAuthenticated && (
+      {user && (
         <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
           <ModalOverlay />
           <ModalContent>

@@ -12,7 +12,7 @@ import {
   Divider,
   Text,
 } from "@chakra-ui/react";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "../hooks/useAuth";
 
 const Profile = () => {
   const { user } = useAuth();
