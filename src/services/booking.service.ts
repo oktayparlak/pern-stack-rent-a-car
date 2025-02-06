@@ -6,19 +6,33 @@ interface CreateBookingRequest {
   endDate: string;
 }
 
-interface Booking {
+interface Vehicle {
+  id: string;
+  brand: string;
+  model: string;
+  year: number;
+  priceADay: number;
+  seats: number;
+  power: number;
+  fuelType: string;
+  transmission: string;
+  image: string;
+  isBooked: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Booking {
   id: string;
   vehicleId: string;
   userId: string;
   startDate: string;
   endDate: string;
+  totalPrice: number | null;
+  status: "PENDING" | "APPROVED" | "REJECTED" | "COMPLETED";
   createdAt: string;
   updatedAt: string;
-  Vehicle?: {
-    brand: string;
-    model: string;
-    image: string;
-  };
+  vehicle: Vehicle;
 }
 
 interface ApiResponse<T> {

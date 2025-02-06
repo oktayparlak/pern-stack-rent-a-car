@@ -2,335 +2,192 @@ import {
   Box,
   Container,
   Heading,
-  Table,
-  Thead,
-  Tbody,
-  Tr,
-  Th,
-  Td,
-  Badge,
-  useColorMode,
+  VStack,
+  HStack,
   Text,
   Image,
-  HStack,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalCloseButton,
-  useDisclosure,
-  VStack,
+  Badge,
+  useColorMode,
+  Spinner,
+  Center,
   Grid,
+  GridItem,
 } from "@chakra-ui/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { bookingService } from "../services/booking.service";
+import { format } from "date-fns";
+import { tr } from "date-fns/locale";
+import type { Booking } from "../services/booking.service";
 
-// Örnek veri - Gerçek uygulamada API'den gelecek
-const rentalData = [
-  {
-    id: 1,
-    car: {
-      brand: "BMW",
-      model: "3 Serisi",
-      imageUrl:
-        "https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=800",
-      year: 2023,
-      plate: "34 ABC 123",
-      color: "Beyaz",
-      transmission: "Otomatik",
-      fuel: "Benzin",
-    },
-    startDate: "2024-02-15",
-    endDate: "2024-02-20",
-    totalPrice: 7500,
-    status: "active",
-    pickupLocation: "İstanbul Havalimanı",
-    dropoffLocation: "İstanbul Havalimanı",
-    insurance: "Tam Kasko",
-    additionalServices: ["Bebek Koltuğu", "GPS"],
-  },
-  {
-    id: 2,
-    car: {
-      brand: "Mercedes",
-      model: "C Serisi",
-      imageUrl:
-        "https://images.unsplash.com/photo-1617531653332-bd46c24f2068?auto=format&fit=crop&w=800",
-      year: 2022,
-      plate: "34 XYZ 789",
-      color: "Siyah",
-      transmission: "Otomatik",
-      fuel: "Dizel",
-    },
-    startDate: "2024-01-10",
-    endDate: "2024-01-15",
-    totalPrice: 8000,
-    status: "completed",
-    pickupLocation: "Sabiha Gökçen Havalimanı",
-    dropoffLocation: "Sabiha Gökçen Havalimanı",
-    insurance: "Tam Kasko",
-    additionalServices: ["WiFi"],
-  },
-];
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case "PENDING":
+      return "yellow";
+    case "APPROVED":
+      return "green";
+    case "REJECTED":
+      return "red";
+    case "COMPLETED":
+      return "blue";
+    default:
+      return "gray";
+  }
+};
+
+const getStatusText = (status: string) => {
+  switch (status) {
+    case "PENDING":
+      return "Onay Bekliyor";
+    case "APPROVED":
+      return "Onaylandı";
+    case "REJECTED":
+      return "Reddedildi";
+    case "COMPLETED":
+      return "Tamamlandı";
+    default:
+      return status;
+  }
+};
 
 const MyRentals = () => {
   const { colorMode } = useColorMode();
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  const [selectedRental, setSelectedRental] = useState<
-    (typeof rentalData)[0] | null
-  >(null);
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleRowClick = (rental: (typeof rentalData)[0]) => {
-    setSelectedRental(rental);
-    onOpen();
-  };
+  useEffect(() => {
+    const fetchBookings = async () => {
+      try {
+        const data = await bookingService.getMyBookings();
+        setBookings(data);
+      } catch (error) {
+        setError(error instanceof Error ? error.message : "Bir hata oluştu");
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "active":
-        return "green";
-      case "completed":
-        return "blue";
-      case "cancelled":
-        return "red";
-      default:
-        return "gray";
-    }
-  };
+    fetchBookings();
+  }, []);
 
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case "active":
-        return "Aktif";
-      case "completed":
-        return "Tamamlandı";
-      case "cancelled":
-        return "İptal Edildi";
-      default:
-        return status;
-    }
-  };
+  if (isLoading) {
+    return (
+      <Center h="calc(100vh - 100px)">
+        <Spinner size="xl" />
+      </Center>
+    );
+  }
+
+  if (error) {
+    return (
+      <Center h="calc(100vh - 100px)">
+        <Text color="red.500">{error}</Text>
+      </Center>
+    );
+  }
 
   return (
-    <Box>
-      <Container maxW="container.xl" py={8}>
-        <Heading mb={6} color={colorMode === "light" ? "gray.800" : "white"}>
-          Kiraladığım Araçlar
-        </Heading>
-        <Box
-          bg={colorMode === "light" ? "white" : "gray.700"}
-          borderRadius="lg"
-          shadow="md"
-          overflow="hidden"
-        >
-          <Table variant="simple">
-            <Thead
-              bg={colorMode === "light" ? "gray.50" : "gray.800"}
-              borderBottom="1px"
-              borderColor={colorMode === "light" ? "gray.200" : "gray.600"}
-            >
-              <Tr>
-                <Th>Araç</Th>
-                <Th>Başlangıç Tarihi</Th>
-                <Th>Bitiş Tarihi</Th>
-                <Th>Toplam Ücret</Th>
-                <Th>Durum</Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              {rentalData.map((rental) => (
-                <Tr
-                  key={rental.id}
-                  onClick={() => handleRowClick(rental)}
-                  cursor="pointer"
-                  _hover={{
-                    bg: colorMode === "light" ? "gray.50" : "gray.600",
-                  }}
+    <Container maxW="container.xl" py={8}>
+      <VStack spacing={8} align="stretch">
+        <Heading size="lg">Kiralamalarım</Heading>
+
+        {bookings.length === 0 ? (
+          <Center h="200px">
+            <Text>Henüz bir kiralama işleminiz bulunmuyor.</Text>
+          </Center>
+        ) : (
+          <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }} gap={6}>
+            {bookings.map((booking) => (
+              <GridItem key={booking.id}>
+                <Box
+                  borderWidth="1px"
+                  borderRadius="lg"
+                  overflow="hidden"
+                  bg={colorMode === "light" ? "white" : "gray.700"}
+                  shadow="md"
                 >
-                  <Td>
-                    <HStack spacing={3}>
-                      <Image
-                        src={rental.car.imageUrl}
-                        alt={`${rental.car.brand} ${rental.car.model}`}
-                        boxSize="50px"
-                        objectFit="cover"
-                        borderRadius="md"
-                      />
-                      <Box>
-                        <Text fontWeight="bold">
-                          {rental.car.brand} {rental.car.model}
-                        </Text>
-                      </Box>
-                    </HStack>
-                  </Td>
-                  <Td>{rental.startDate}</Td>
-                  <Td>{rental.endDate}</Td>
-                  <Td>₺{rental.totalPrice}</Td>
-                  <Td>
-                    <Badge colorScheme={getStatusColor(rental.status)}>
-                      {getStatusText(rental.status)}
-                    </Badge>
-                  </Td>
-                </Tr>
-              ))}
-            </Tbody>
-          </Table>
-        </Box>
-      </Container>
-
-      {/* Detay Modalı */}
-      <Modal isOpen={isOpen} onClose={onClose} size="xl">
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader borderBottomWidth="1px">
-            <HStack spacing={3}>
-              <Image
-                src={selectedRental?.car.imageUrl}
-                alt={`${selectedRental?.car.brand} ${selectedRental?.car.model}`}
-                boxSize="40px"
-                objectFit="cover"
-                borderRadius="md"
-              />
-              <Text>
-                {selectedRental?.car.brand} {selectedRental?.car.model}
-              </Text>
-            </HStack>
-          </ModalHeader>
-          <ModalCloseButton />
-          <ModalBody pb={6}>
-            {selectedRental && (
-              <VStack spacing={8} align="stretch">
-                <Box>
                   <Image
-                    src={selectedRental.car.imageUrl}
-                    alt={`${selectedRental.car.brand} ${selectedRental.car.model}`}
-                    w="100%"
-                    h="250px"
+                    src={booking.vehicle.image}
+                    alt={`${booking.vehicle.brand} ${booking.vehicle.model}`}
+                    height="200px"
+                    width="100%"
                     objectFit="cover"
-                    borderRadius="xl"
                   />
-                </Box>
-
-                <Box>
-                  <Text fontSize="lg" fontWeight="bold" mb={4}>
-                    Araç Bilgileri
-                  </Text>
-                  <Grid
-                    templateColumns="repeat(2, 1fr)"
-                    gap={4}
-                    bg={colorMode === "light" ? "gray.50" : "gray.700"}
-                    p={4}
-                    borderRadius="lg"
-                  >
-                    <HStack>
-                      <Text fontWeight="medium">Plaka:</Text>
-                      <Text>{selectedRental.car.plate}</Text>
-                    </HStack>
-                    <HStack>
-                      <Text fontWeight="medium">Model Yılı:</Text>
-                      <Text>{selectedRental.car.year}</Text>
-                    </HStack>
-                    <HStack>
-                      <Text fontWeight="medium">Renk:</Text>
-                      <Text>{selectedRental.car.color}</Text>
-                    </HStack>
-                    <HStack>
-                      <Text fontWeight="medium">Vites:</Text>
-                      <Text>{selectedRental.car.transmission}</Text>
-                    </HStack>
-                    <HStack>
-                      <Text fontWeight="medium">Yakıt:</Text>
-                      <Text>{selectedRental.car.fuel}</Text>
-                    </HStack>
-                  </Grid>
-                </Box>
-
-                <Box>
-                  <Text fontSize="lg" fontWeight="bold" mb={4}>
-                    Kiralama Detayları
-                  </Text>
-                  <VStack
-                    spacing={4}
-                    align="stretch"
-                    bg={colorMode === "light" ? "gray.50" : "gray.700"}
-                    p={4}
-                    borderRadius="lg"
-                  >
-                    <Grid templateColumns="repeat(2, 1fr)" gap={4}>
-                      <Box>
-                        <Text
-                          fontWeight="medium"
-                          color="gray.500"
-                          fontSize="sm"
+                  <Box p={6}>
+                    <VStack align="stretch" spacing={4}>
+                      <HStack justify="space-between">
+                        <Heading size="md">
+                          {booking.vehicle.brand} {booking.vehicle.model}
+                        </Heading>
+                        <Badge
+                          colorScheme={getStatusColor(booking.status)}
+                          px={2}
+                          py={1}
+                          borderRadius="md"
                         >
-                          Başlangıç Tarihi
-                        </Text>
-                        <Text>{selectedRental.startDate}</Text>
-                      </Box>
+                          {getStatusText(booking.status)}
+                        </Badge>
+                      </HStack>
+
+                      <Grid templateColumns="repeat(2, 1fr)" gap={4}>
+                        <Box>
+                          <Text fontWeight="bold">Başlangıç Tarihi</Text>
+                          <Text>
+                            {format(
+                              new Date(booking.startDate),
+                              "d MMMM yyyy",
+                              {
+                                locale: tr,
+                              }
+                            )}
+                          </Text>
+                        </Box>
+                        <Box>
+                          <Text fontWeight="bold">Bitiş Tarihi</Text>
+                          <Text>
+                            {format(new Date(booking.endDate), "d MMMM yyyy", {
+                              locale: tr,
+                            })}
+                          </Text>
+                        </Box>
+                        <Box>
+                          <Text fontWeight="bold">Günlük Fiyat</Text>
+                          <Text>₺{booking.vehicle.priceADay}</Text>
+                        </Box>
+                        <Box>
+                          <Text fontWeight="bold">Toplam Gün</Text>
+                          <Text>
+                            {Math.ceil(
+                              (new Date(booking.endDate).getTime() -
+                                new Date(booking.startDate).getTime()) /
+                                (1000 * 60 * 60 * 24)
+                            )}{" "}
+                            gün
+                          </Text>
+                        </Box>
+                      </Grid>
+
                       <Box>
-                        <Text
-                          fontWeight="medium"
-                          color="gray.500"
-                          fontSize="sm"
-                        >
-                          Bitiş Tarihi
-                        </Text>
-                        <Text>{selectedRental.endDate}</Text>
-                      </Box>
-                    </Grid>
-
-                    <Box>
-                      <Text fontWeight="medium" color="gray.500" fontSize="sm">
-                        Alış Yeri
-                      </Text>
-                      <Text>{selectedRental.pickupLocation}</Text>
-                    </Box>
-
-                    <Box>
-                      <Text fontWeight="medium" color="gray.500" fontSize="sm">
-                        Teslim Yeri
-                      </Text>
-                      <Text>{selectedRental.dropoffLocation}</Text>
-                    </Box>
-
-                    <Box>
-                      <Text fontWeight="medium" color="gray.500" fontSize="sm">
-                        Sigorta
-                      </Text>
-                      <Text>{selectedRental.insurance}</Text>
-                    </Box>
-
-                    {selectedRental.additionalServices.length > 0 && (
-                      <Box>
-                        <Text
-                          fontWeight="medium"
-                          color="gray.500"
-                          fontSize="sm"
-                        >
-                          Ek Hizmetler
-                        </Text>
-                        <Text>
-                          {selectedRental.additionalServices.join(", ")}
+                        <Text fontWeight="bold">Toplam Tutar</Text>
+                        <Text fontSize="xl" color="blue.500">
+                          ₺
+                          {booking.vehicle.priceADay *
+                            Math.ceil(
+                              (new Date(booking.endDate).getTime() -
+                                new Date(booking.startDate).getTime()) /
+                                (1000 * 60 * 60 * 24)
+                            )}
                         </Text>
                       </Box>
-                    )}
-
-                    <Box pt={2} borderTopWidth="1px">
-                      <Text fontWeight="medium" color="gray.500" fontSize="sm">
-                        Toplam Ücret
-                      </Text>
-                      <Text fontSize="xl" fontWeight="bold" color="blue.500">
-                        ₺{selectedRental.totalPrice}
-                      </Text>
-                    </Box>
-                  </VStack>
+                    </VStack>
+                  </Box>
                 </Box>
-              </VStack>
-            )}
-          </ModalBody>
-        </ModalContent>
-      </Modal>
-    </Box>
+              </GridItem>
+            ))}
+          </Grid>
+        )}
+      </VStack>
+    </Container>
   );
 };
 
