@@ -16,6 +16,11 @@ interface UpdateProfileRequest {
   email: string;
 }
 
+interface UpdatePasswordRequest {
+  oldPassword: string;
+  newPassword: string;
+}
+
 interface ApiResponse<T> {
   success: boolean;
   message: string;
@@ -26,6 +31,17 @@ export const userService = {
   async updateProfile(data: UpdateProfileRequest): Promise<User> {
     const { data: response } = await api.patch<ApiResponse<User>>(
       "/users/profile",
+      data
+    );
+    if (!response.success) {
+      throw new Error(response.message);
+    }
+    return response.data;
+  },
+
+  async updatePassword(data: UpdatePasswordRequest): Promise<User> {
+    const { data: response } = await api.patch<ApiResponse<User>>(
+      "/users/password",
       data
     );
     if (!response.success) {

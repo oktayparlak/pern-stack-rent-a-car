@@ -101,7 +101,11 @@ const Profile = () => {
         throw new Error("Mevcut şifrenizi girmelisiniz");
       }
 
-      // TODO: API'ye şifre güncelleme isteği gönderilecek
+      await userService.updatePassword({
+        oldPassword: passwordData.currentPassword,
+        newPassword: passwordData.newPassword,
+      });
+
       toast({
         title: "Şifre güncellendi",
         status: "success",
