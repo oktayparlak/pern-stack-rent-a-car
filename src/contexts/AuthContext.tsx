@@ -12,11 +12,14 @@ interface User {
   firstName: string;
   lastName: string;
   email: string;
+  isAdmin: boolean;
 }
 
 interface AuthContextType {
   user: User | null;
   token: string | null;
+  isAdmin: boolean;
+  isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (
     firstName: string,
@@ -34,9 +37,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [token, setToken] = useState<string | null>(
     localStorage.getItem("token")
   );
+  const [isLoading, setIsLoading] = useState(true);
+  const isAdmin = user?.isAdmin || false;
 
   useEffect(() => {
-    const fetchUser = async () => {
+    const initAuth = async () => {
       const storedToken = localStorage.getItem("token");
       if (storedToken) {
         try {
@@ -48,9 +53,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           logout();
         }
       }
+      setIsLoading(false);
     };
 
-    fetchUser();
+    initAuth();
   }, []);
 
   const login = async (email: string, password: string) => {
@@ -83,8 +89,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     localStorage.removeItem("token");
   };
 
+  if (isLoading) {
+    return null; // veya bir loading spinner gösterebilirsiniz
+  }
+
   return (
-    <AuthContext.Provider value={{ user, token, login, register, logout }}>
+    <AuthContext.Provider
+      value={{ user, token, isAdmin, isLoading, login, register, logout }}
+    >
       {children}
     </AuthContext.Provider>
   );

@@ -1,167 +1,233 @@
+import { useState, useEffect } from "react";
 import {
-  Container,
-  VStack,
-  Heading,
+  Box,
+  Button,
   FormControl,
   FormLabel,
   Input,
-  Button,
-  useColorMode,
+  VStack,
+  Heading,
   useToast,
+  HStack,
   Divider,
   Text,
 } from "@chakra-ui/react";
-import { useState } from "react";
+import { useAuth } from "../contexts/AuthContext";
 
 const Profile = () => {
-  const { colorMode } = useColorMode();
+  const { user } = useAuth();
   const toast = useToast();
+  const [isProfileLoading, setIsProfileLoading] = useState(false);
+  const [isPasswordLoading, setIsPasswordLoading] = useState(false);
 
-  const [formData, setFormData] = useState({
-    name: "Örnek Kullanıcı",
-    email: "user@example.com",
+  const [profileData, setProfileData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+  });
+
+  const [passwordData, setPasswordData] = useState({
     currentPassword: "",
     newPassword: "",
     confirmPassword: "",
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  useEffect(() => {
+    if (user) {
+      setProfileData({
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+      });
+    }
+  }, [user]);
+
+  const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
+    setProfileData((prev) => ({
       ...prev,
       [name]: value,
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setPasswordData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsProfileLoading(true);
 
-    // Şifre değişikliği kontrolü
-    if (formData.newPassword) {
-      if (formData.newPassword !== formData.confirmPassword) {
-        toast({
-          title: "Hata",
-          description: "Yeni şifreler eşleşmiyor",
-          status: "error",
-          duration: 3000,
-          isClosable: true,
-        });
-        return;
-      }
-
-      if (!formData.currentPassword) {
-        toast({
-          title: "Hata",
-          description: "Mevcut şifrenizi girmelisiniz",
-          status: "error",
-          duration: 3000,
-          isClosable: true,
-        });
-        return;
-      }
+    try {
+      // TODO: API'ye profil güncelleme isteği gönderilecek
+      toast({
+        title: "Profil güncellendi",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+        position: "bottom",
+      });
+    } catch (error) {
+      toast({
+        title: "Güncelleme başarısız",
+        description: error instanceof Error ? error.message : "Bir hata oluştu",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+        position: "bottom",
+      });
+    } finally {
+      setIsProfileLoading(false);
     }
+  };
 
-    // API çağrısı yapılacak
-    toast({
-      title: "Başarılı",
-      description: "Profil bilgileriniz güncellendi",
-      status: "success",
-      duration: 3000,
-      isClosable: true,
-    });
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsPasswordLoading(true);
+
+    try {
+      if (passwordData.newPassword !== passwordData.confirmPassword) {
+        throw new Error("Yeni şifreler eşleşmiyor");
+      }
+      if (!passwordData.currentPassword) {
+        throw new Error("Mevcut şifrenizi girmelisiniz");
+      }
+
+      // TODO: API'ye şifre güncelleme isteği gönderilecek
+      toast({
+        title: "Şifre güncellendi",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+        position: "bottom",
+      });
+
+      // Şifre alanlarını temizle
+      setPasswordData({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+    } catch (error) {
+      toast({
+        title: "Şifre güncelleme başarısız",
+        description: error instanceof Error ? error.message : "Bir hata oluştu",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+        position: "bottom",
+      });
+    } finally {
+      setIsPasswordLoading(false);
+    }
   };
 
   return (
-    <Container
-      maxW="container.md"
-      py={8}
-      minH="calc(100vh - 64px)"
-      bg={colorMode === "light" ? "white" : "gray.800"}
-      display="flex"
-      flexDirection="column"
-    >
-      <VStack spacing={8} align="stretch" flex="1">
-        <Heading color={colorMode === "light" ? "gray.800" : "white"}>
-          Profil Bilgilerim
-        </Heading>
+    <Box maxW="md" mx="auto" mt={8} p={6} borderWidth={1} borderRadius="lg">
+      <VStack spacing={8}>
+        <Heading size="lg">Profil Bilgileri</Heading>
 
+        {/* Kişisel Bilgiler Formu */}
         <VStack
           as="form"
-          onSubmit={handleSubmit}
+          onSubmit={handleProfileSubmit}
           spacing={6}
-          align="stretch"
-          bg={colorMode === "light" ? "white" : "gray.700"}
-          p={8}
-          borderRadius="lg"
-          shadow="md"
+          width="100%"
         >
-          <Text fontSize="xl" fontWeight="bold">
+          <Text fontWeight="bold" alignSelf="flex-start">
             Kişisel Bilgiler
           </Text>
-
-          <FormControl>
-            <FormLabel>Ad Soyad</FormLabel>
-            <Input name="name" value={formData.name} onChange={handleChange} />
-          </FormControl>
-
-          <FormControl>
-            <FormLabel>E-posta</FormLabel>
+          <HStack spacing={4} width="100%">
+            <FormControl isRequired>
+              <FormLabel>Ad</FormLabel>
+              <Input
+                name="firstName"
+                value={profileData.firstName}
+                onChange={handleProfileChange}
+              />
+            </FormControl>
+            <FormControl isRequired>
+              <FormLabel>Soyad</FormLabel>
+              <Input
+                name="lastName"
+                value={profileData.lastName}
+                onChange={handleProfileChange}
+              />
+            </FormControl>
+          </HStack>
+          <FormControl isRequired>
+            <FormLabel>Email</FormLabel>
             <Input
-              name="email"
               type="email"
-              value={formData.email}
-              onChange={handleChange}
+              name="email"
+              value={profileData.email}
+              onChange={handleProfileChange}
             />
           </FormControl>
-
-          <Divider my={4} />
-
-          <Text fontSize="xl" fontWeight="bold">
-            Şifre Değiştir
-          </Text>
-
-          <FormControl>
-            <FormLabel>Mevcut Şifre</FormLabel>
-            <Input
-              name="currentPassword"
-              type="password"
-              value={formData.currentPassword}
-              onChange={handleChange}
-            />
-          </FormControl>
-
-          <FormControl>
-            <FormLabel>Yeni Şifre</FormLabel>
-            <Input
-              name="newPassword"
-              type="password"
-              value={formData.newPassword}
-              onChange={handleChange}
-            />
-          </FormControl>
-
-          <FormControl>
-            <FormLabel>Yeni Şifre Tekrar</FormLabel>
-            <Input
-              name="confirmPassword"
-              type="password"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-            />
-          </FormControl>
-
           <Button
             type="submit"
             colorScheme="blue"
-            size="lg"
             width="100%"
-            mt={4}
+            isLoading={isProfileLoading}
           >
-            Değişiklikleri Kaydet
+            Profili Güncelle
+          </Button>
+        </VStack>
+
+        <Divider />
+
+        {/* Şifre Değiştirme Formu */}
+        <VStack
+          as="form"
+          onSubmit={handlePasswordSubmit}
+          spacing={6}
+          width="100%"
+        >
+          <Text fontWeight="bold" alignSelf="flex-start">
+            Şifre Değiştir
+          </Text>
+          <FormControl>
+            <FormLabel>Mevcut Şifre</FormLabel>
+            <Input
+              type="password"
+              name="currentPassword"
+              value={passwordData.currentPassword}
+              onChange={handlePasswordChange}
+            />
+          </FormControl>
+          <FormControl>
+            <FormLabel>Yeni Şifre</FormLabel>
+            <Input
+              type="password"
+              name="newPassword"
+              value={passwordData.newPassword}
+              onChange={handlePasswordChange}
+            />
+          </FormControl>
+          <FormControl>
+            <FormLabel>Yeni Şifre Tekrar</FormLabel>
+            <Input
+              type="password"
+              name="confirmPassword"
+              value={passwordData.confirmPassword}
+              onChange={handlePasswordChange}
+            />
+          </FormControl>
+          <Button
+            type="submit"
+            colorScheme="blue"
+            width="100%"
+            isLoading={isPasswordLoading}
+          >
+            Şifreyi Güncelle
           </Button>
         </VStack>
       </VStack>
-    </Container>
+    </Box>
   );
 };
 

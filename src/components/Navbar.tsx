@@ -23,7 +23,7 @@ const Navbar = () => {
   const { colorMode, toggleColorMode } = useColorMode();
   const navigate = useNavigate();
   const toast = useToast();
-  const { user, logout } = useAuth();
+  const { user, logout, isAdmin } = useAuth();
 
   const handleLogout = () => {
     logout();
@@ -33,6 +33,7 @@ const Navbar = () => {
       status: "success",
       duration: 3000,
       isClosable: true,
+      position: "bottom",
     });
   };
 
@@ -87,9 +88,15 @@ const Navbar = () => {
                   </HStack>
                 </MenuButton>
                 <MenuList>
-                  <MenuItem onClick={() => navigate("/my-rentals")}>
-                    Kiralamalarım
-                  </MenuItem>
+                  {isAdmin ? (
+                    <MenuItem onClick={() => navigate("/admin")}>
+                      Admin Panel
+                    </MenuItem>
+                  ) : (
+                    <MenuItem onClick={() => navigate("/my-rentals")}>
+                      Kiralamalarım
+                    </MenuItem>
+                  )}
                   <MenuItem onClick={() => navigate("/profile")}>
                     Profil
                   </MenuItem>

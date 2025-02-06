@@ -40,12 +40,13 @@ const Register = () => {
       );
       toast({
         title: "Kayıt başarılı",
-        description: "Hesabınız oluşturuldu",
+        description: "Hesabınız oluşturuldu. Giriş yapabilirsiniz.",
         status: "success",
         duration: 3000,
         isClosable: true,
+        position: "bottom",
       });
-      navigate("/");
+      navigate("/login");
     } catch (error) {
       toast({
         title: "Kayıt başarısız",
@@ -53,6 +54,7 @@ const Register = () => {
         status: "error",
         duration: 3000,
         isClosable: true,
+        position: "bottom",
       });
     } finally {
       setIsLoading(false);

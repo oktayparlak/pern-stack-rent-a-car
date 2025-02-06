@@ -34,6 +34,7 @@ const Login = () => {
         status: "success",
         duration: 3000,
         isClosable: true,
+        position: "bottom",
       });
       navigate("/");
     } catch (error) {
@@ -43,6 +44,7 @@ const Login = () => {
         status: "error",
         duration: 3000,
         isClosable: true,
+        position: "bottom",
       });
     } finally {
       setIsLoading(false);

@@ -1,4 +1,5 @@
 import api from "./api";
+import axios from "axios";
 
 interface LoginCredentials {
   email: string;
@@ -17,6 +18,7 @@ interface User {
   firstName: string;
   lastName: string;
   email: string;
+  isAdmin: boolean;
 }
 
 interface ApiResponse<T> {
@@ -32,23 +34,53 @@ interface AuthResponseData {
 
 export const authService = {
   async login(credentials: LoginCredentials): Promise<AuthResponseData> {
-    const { data } = await api.post<ApiResponse<AuthResponseData>>(
-      "/auths/login",
-      credentials
-    );
-    return data.data;
+    try {
+      const { data } = await api.post<ApiResponse<AuthResponseData>>(
+        "/auths/login",
+        credentials
+      );
+      if (!data.success) {
+        throw new Error(data.message);
+      }
+      return data.data;
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.data) {
+        throw new Error(error.response.data.message);
+      }
+      throw error;
+    }
   },
 
   async register(credentials: RegisterCredentials): Promise<AuthResponseData> {
-    const { data } = await api.post<ApiResponse<AuthResponseData>>(
-      "/auths/register",
-      credentials
-    );
-    return data.data;
+    try {
+      const { data } = await api.post<ApiResponse<AuthResponseData>>(
+        "/auths/register",
+        credentials
+      );
+      if (!data.success) {
+        throw new Error(data.message);
+      }
+      return data.data;
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.data) {
+        throw new Error(error.response.data.message);
+      }
+      throw error;
+    }
   },
 
   async getCurrentUser(): Promise<User> {
-    const { data } = await api.get<ApiResponse<User>>("/auths/me");
-    return data.data;
+    try {
+      const { data } = await api.get<ApiResponse<User>>("/auths/me");
+      if (!data.success) {
+        throw new Error(data.message);
+      }
+      return data.data;
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.data) {
+        throw new Error(error.response.data.message);
+      }
+      throw error;
+    }
   },
 };
