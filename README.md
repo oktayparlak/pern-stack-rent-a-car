@@ -53,7 +53,7 @@ This project was developed using Cursor IDE, leveraging its AI pair programming 
 1. Clone the repository:
 
 ```bash
-git clone [repo-url]
+git clone https://github.com/oktayparlak/pern-stack-rent-a-car.git
 ```
 
 2. Backend setup:
