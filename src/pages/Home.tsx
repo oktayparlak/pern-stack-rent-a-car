@@ -1,260 +1,104 @@
+import { useState, useEffect } from "react";
 import {
-  Box,
   Container,
-  Grid,
+  SimpleGrid,
+  Box,
   Heading,
-  useColorMode,
-  Button,
-  HStack,
   Text,
+  useColorMode,
+  Spinner,
+  Center,
 } from "@chakra-ui/react";
-import { useState } from "react";
-import CarCard from "../components/CarCard";
-
-// Örnek veri - Gerçek uygulamada API'den gelecek
-const sampleCars = [
-  {
-    id: 1,
-    brand: "BMW",
-    model: "3 Serisi",
-    year: 2023,
-    price: 1500,
-    imageUrl:
-      "https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=800",
-  },
-  {
-    id: 2,
-    brand: "Mercedes",
-    model: "C Serisi",
-    year: 2022,
-    price: 1600,
-    imageUrl:
-      "https://images.unsplash.com/photo-1617531653332-bd46c24f2068?auto=format&fit=crop&w=800",
-  },
-  {
-    id: 3,
-    brand: "Audi",
-    model: "A4",
-    year: 2023,
-    price: 1450,
-    imageUrl:
-      "https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?auto=format&fit=crop&w=800",
-  },
-  {
-    id: 4,
-    brand: "Volkswagen",
-    model: "Passat",
-    year: 2022,
-    price: 1200,
-    imageUrl:
-      "https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?auto=format&fit=crop&w=800",
-  },
-  {
-    id: 5,
-    brand: "BMW",
-    model: "5 Serisi",
-    year: 2023,
-    price: 1800,
-    imageUrl:
-      "https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=800",
-  },
-  {
-    id: 6,
-    brand: "Mercedes",
-    model: "E Serisi",
-    year: 2022,
-    price: 2000,
-    imageUrl:
-      "https://images.unsplash.com/photo-1617531653332-bd46c24f2068?auto=format&fit=crop&w=800",
-  },
-  {
-    id: 7,
-    brand: "Audi",
-    model: "A6",
-    year: 2023,
-    price: 2200,
-    imageUrl:
-      "https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?auto=format&fit=crop&w=800",
-  },
-  {
-    id: 8,
-    brand: "BMW",
-    model: "7 Serisi",
-    year: 2023,
-    price: 2500,
-    imageUrl:
-      "https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=800",
-  },
-  {
-    id: 9,
-    brand: "Mercedes",
-    model: "S Serisi",
-    year: 2023,
-    price: 3000,
-    imageUrl:
-      "https://images.unsplash.com/photo-1617531653332-bd46c24f2068?auto=format&fit=crop&w=800",
-  },
-  {
-    id: 10,
-    brand: "Audi",
-    model: "Q7",
-    year: 2023,
-    price: 2800,
-    imageUrl:
-      "https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?auto=format&fit=crop&w=800",
-  },
-  {
-    id: 11,
-    brand: "Volkswagen",
-    model: "Arteon",
-    year: 2023,
-    price: 1800,
-    imageUrl:
-      "https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?auto=format&fit=crop&w=800",
-  },
-  {
-    id: 12,
-    brand: "BMW",
-    model: "X5",
-    year: 2023,
-    price: 2700,
-    imageUrl:
-      "https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=800",
-  },
-  {
-    id: 13,
-    brand: "Mercedes",
-    model: "GLE",
-    year: 2023,
-    price: 2600,
-    imageUrl:
-      "https://images.unsplash.com/photo-1617531653332-bd46c24f2068?auto=format&fit=crop&w=800",
-  },
-  {
-    id: 14,
-    brand: "Audi",
-    model: "Q5",
-    year: 2023,
-    price: 2400,
-    imageUrl:
-      "https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?auto=format&fit=crop&w=800",
-  },
-  {
-    id: 15,
-    brand: "Volkswagen",
-    model: "Tiguan",
-    year: 2023,
-    price: 1900,
-    imageUrl:
-      "https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?auto=format&fit=crop&w=800",
-  },
-  {
-    id: 16,
-    brand: "BMW",
-    model: "X3",
-    year: 2023,
-    price: 2300,
-    imageUrl:
-      "https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=800",
-  },
-];
-
-const ITEMS_PER_PAGE = 8;
+import { Link } from "react-router-dom";
+import { vehicleService, Vehicle } from "../services/vehicle.service";
 
 const Home = () => {
   const { colorMode } = useColorMode();
-  const [currentPage, setCurrentPage] = useState(1);
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Toplam sayfa sayısını hesapla
-  const totalPages = Math.ceil(sampleCars.length / ITEMS_PER_PAGE);
+  useEffect(() => {
+    const fetchVehicles = async () => {
+      try {
+        const data = await vehicleService.getAllVehicles();
+        setVehicles(data);
+      } catch (error) {
+        setError(
+          error instanceof Error
+            ? error.message
+            : "Araçlar yüklenirken bir hata oluştu"
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  // Mevcut sayfada gösterilecek arabaları hesapla
-  const currentCars = sampleCars.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
-  );
+    fetchVehicles();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <Center h="calc(100vh - 100px)">
+        <Spinner size="xl" />
+      </Center>
+    );
+  }
+
+  if (error) {
+    return (
+      <Center h="calc(100vh - 100px)">
+        <Text color="red.500">{error}</Text>
+      </Center>
+    );
+  }
 
   return (
-    <Box flex="1" overflow="auto" py={8}>
-      <Container
-        maxW="container.xl"
-        h="full"
-        bg={colorMode === "light" ? "gray.100" : "gray.700"}
-        borderRadius="xl"
-        p={8}
-        boxShadow="lg"
-        borderWidth="1px"
-        borderColor={colorMode === "light" ? "gray.200" : "gray.600"}
-      >
-        <Heading mb={6} color={colorMode === "light" ? "gray.800" : "white"}>
-          Kiralık Araçlar
-        </Heading>
-        <Grid
-          templateColumns={{
-            base: "1fr",
-            sm: "repeat(2, 1fr)",
-            md: "repeat(3, 1fr)",
-            lg: "repeat(4, 1fr)",
-          }}
-          gap={6}
-          pb={8}
-        >
-          {currentCars.map((car) => (
-            <CarCard
-              key={car.id}
-              id={car.id}
-              brand={car.brand}
-              model={car.model}
-              year={car.year}
-              price={car.price}
-              imageUrl={car.imageUrl}
-            />
-          ))}
-        </Grid>
-
-        {/* Pagination */}
-        <HStack justify="center" spacing={4} mt={8}>
-          <Button
-            onClick={() => setCurrentPage((prev) => prev - 1)}
-            isDisabled={currentPage === 1}
-            colorScheme="blue"
-            variant="outline"
-          >
-            Önceki
-          </Button>
-
-          <HStack spacing={2}>
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-              <Button
-                key={page}
-                onClick={() => setCurrentPage(page)}
-                colorScheme={currentPage === page ? "blue" : "gray"}
-                variant={currentPage === page ? "solid" : "outline"}
-              >
-                {page}
-              </Button>
-            ))}
-          </HStack>
-
-          <Button
-            onClick={() => setCurrentPage((prev) => prev + 1)}
-            isDisabled={currentPage === totalPages}
-            colorScheme="blue"
-            variant="outline"
-          >
-            Sonraki
-          </Button>
-        </HStack>
-
-        <Text
-          textAlign="center"
-          mt={4}
-          color={colorMode === "light" ? "gray.600" : "gray.300"}
-        >
-          Toplam {sampleCars.length} araç, Sayfa {currentPage}/{totalPages}
-        </Text>
-      </Container>
-    </Box>
+    <Container maxW="container.xl" py={8}>
+      <Heading mb={8}>Araç Listesi</Heading>
+      <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6}>
+        {vehicles.map((vehicle) => (
+          <Link key={vehicle.id} to={`/car/${vehicle.id}`}>
+            <Box
+              borderWidth="1px"
+              borderRadius="lg"
+              overflow="hidden"
+              bg={colorMode === "light" ? "white" : "gray.700"}
+              transition="transform 0.2s"
+              _hover={{ transform: "scale(1.02)" }}
+            >
+              <Box h="200px" overflow="hidden">
+                <img
+                  src={vehicle.image}
+                  alt={`${vehicle.brand} ${vehicle.model}`}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                  }}
+                />
+              </Box>
+              <Box p={4}>
+                <Heading size="md" mb={2}>
+                  {vehicle.brand} {vehicle.model}
+                </Heading>
+                <Text fontSize="lg" fontWeight="bold" color="blue.500" mb={2}>
+                  ₺{vehicle.priceADay} / gün
+                </Text>
+                <Text color={colorMode === "light" ? "gray.600" : "gray.300"}>
+                  {vehicle.year} • {vehicle.transmission} • {vehicle.fuelType}
+                </Text>
+                {vehicle.isBooked && (
+                  <Text color="red.500" fontWeight="bold" mt={2}>
+                    Kiralandı
+                  </Text>
+                )}
+              </Box>
+            </Box>
+          </Link>
+        ))}
+      </SimpleGrid>
+    </Container>
   );
 };
 

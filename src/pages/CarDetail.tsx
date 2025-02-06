@@ -22,10 +22,13 @@ import {
   FormLabel,
   Input,
   useToast,
+  Center,
+  Spinner,
 } from "@chakra-ui/react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../hooks/useAuth";
+import { vehicleService, Vehicle } from "../services/vehicle.service";
 
 const CarDetail = () => {
   const { colorMode } = useColorMode();
@@ -34,10 +37,29 @@ const CarDetail = () => {
   const toast = useToast();
   const { user } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [vehicle, setVehicle] = useState<Vehicle | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [rentalDates, setRentalDates] = useState({
     startDate: "",
     endDate: "",
   });
+
+  useEffect(() => {
+    const fetchVehicle = async () => {
+      if (!id) return;
+      try {
+        const data = await vehicleService.getVehicleById(id);
+        setVehicle(data);
+      } catch (error) {
+        setError(error instanceof Error ? error.message : "Bir hata oluştu");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchVehicle();
+  }, [id]);
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -114,6 +136,16 @@ const CarDetail = () => {
       navigate("/login");
       return;
     }
+    if (vehicle?.isBooked) {
+      toast({
+        title: "Hata",
+        description: "Bu araç şu anda kiralanmış durumda",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
     setIsModalOpen(true);
   };
 
@@ -131,34 +163,21 @@ const CarDetail = () => {
     navigate("/my-rentals");
   };
 
-  // Örnek veri - Gerçek uygulamada API'den gelecek
-  const carDetails = {
-    id: Number(id),
-    brand: "BMW",
-    model: "3 Serisi",
-    year: 2023,
-    price: 1500,
-    imageUrl:
-      "https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=800",
-    specs: {
-      motor: "2.0L Turbo",
-      beygir: "252 HP",
-      yakitTipi: "Benzin",
-      vites: "Otomatik",
-      koltuk: "5",
-      bagaj: "480L",
-    },
-    features: [
-      "Deri Koltuk",
-      "Navigasyon",
-      "Geri Görüş Kamerası",
-      "Bluetooth",
-      "Klima",
-      "ABS",
-      "ESP",
-      "Yol Bilgisayarı",
-    ],
-  };
+  if (isLoading) {
+    return (
+      <Center h="calc(100vh - 100px)">
+        <Spinner size="xl" />
+      </Center>
+    );
+  }
+
+  if (error || !vehicle) {
+    return (
+      <Center h="calc(100vh - 100px)">
+        <Text color="red.500">{error || "Araç bulunamadı"}</Text>
+      </Center>
+    );
+  }
 
   return (
     <Container maxW="container.xl" py={8}>
@@ -175,8 +194,8 @@ const CarDetail = () => {
           shadow="md"
         >
           <Image
-            src={carDetails.imageUrl}
-            alt={`${carDetails.brand} ${carDetails.model}`}
+            src={vehicle.image}
+            alt={`${vehicle.brand} ${vehicle.model}`}
             width="100%"
             height="auto"
             maxH="500px"
@@ -194,11 +213,16 @@ const CarDetail = () => {
           <VStack align="stretch" spacing={6}>
             <Box>
               <Heading size="lg" mb={2}>
-                {carDetails.brand} {carDetails.model}
+                {vehicle.brand} {vehicle.model}
               </Heading>
               <Badge colorScheme="blue" fontSize="lg" px={3} py={1}>
-                {carDetails.year}
+                {vehicle.year}
               </Badge>
+              {vehicle.isBooked && (
+                <Badge colorScheme="red" fontSize="lg" px={3} py={1} ml={2}>
+                  Kiralandı
+                </Badge>
+              )}
             </Box>
 
             <Text
@@ -206,7 +230,7 @@ const CarDetail = () => {
               fontWeight="bold"
               color={colorMode === "light" ? "blue.600" : "blue.200"}
             >
-              ₺{carDetails.price} / gün
+              ₺{vehicle.priceADay} / gün
             </Text>
 
             <Divider />
@@ -217,42 +241,21 @@ const CarDetail = () => {
               </Heading>
               <Grid templateColumns="repeat(2, 1fr)" gap={4}>
                 <HStack>
-                  <Text fontWeight="bold">Motor:</Text>
-                  <Text>{carDetails.specs.motor}</Text>
-                </HStack>
-                <HStack>
-                  <Text fontWeight="bold">Güç:</Text>
-                  <Text>{carDetails.specs.beygir}</Text>
+                  <Text fontWeight="bold">Motor Gücü:</Text>
+                  <Text>{vehicle.power} HP</Text>
                 </HStack>
                 <HStack>
                   <Text fontWeight="bold">Yakıt:</Text>
-                  <Text>{carDetails.specs.yakitTipi}</Text>
+                  <Text>{vehicle.fuelType}</Text>
                 </HStack>
                 <HStack>
                   <Text fontWeight="bold">Vites:</Text>
-                  <Text>{carDetails.specs.vites}</Text>
+                  <Text>{vehicle.transmission}</Text>
                 </HStack>
                 <HStack>
                   <Text fontWeight="bold">Koltuk:</Text>
-                  <Text>{carDetails.specs.koltuk}</Text>
+                  <Text>{vehicle.seats}</Text>
                 </HStack>
-                <HStack>
-                  <Text fontWeight="bold">Bagaj:</Text>
-                  <Text>{carDetails.specs.bagaj}</Text>
-                </HStack>
-              </Grid>
-            </Box>
-
-            <Divider />
-
-            <Box>
-              <Heading size="md" mb={4}>
-                Özellikler
-              </Heading>
-              <Grid templateColumns="repeat(2, 1fr)" gap={2}>
-                {carDetails.features.map((feature, index) => (
-                  <Text key={index}>• {feature}</Text>
-                ))}
               </Grid>
             </Box>
 
@@ -261,8 +264,9 @@ const CarDetail = () => {
               size="lg"
               mt={4}
               onClick={handleRentClick}
+              isDisabled={vehicle.isBooked}
             >
-              Hemen Kirala
+              {vehicle.isBooked ? "Kiralandı" : "Hemen Kirala"}
             </Button>
           </VStack>
         </Box>
@@ -313,7 +317,7 @@ const CarDetail = () => {
                       color={colorMode === "light" ? "blue.600" : "blue.200"}
                     >
                       ₺
-                      {carDetails.price *
+                      {vehicle.priceADay *
                         Math.ceil(
                           (new Date(rentalDates.endDate).getTime() -
                             new Date(rentalDates.startDate).getTime()) /

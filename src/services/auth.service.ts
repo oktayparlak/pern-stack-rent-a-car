@@ -1,5 +1,4 @@
 import api from "./api";
-import axios from "axios";
 
 interface LoginCredentials {
   email: string;
@@ -34,53 +33,32 @@ interface AuthResponseData {
 
 export const authService = {
   async login(credentials: LoginCredentials): Promise<AuthResponseData> {
-    try {
-      const { data } = await api.post<ApiResponse<AuthResponseData>>(
-        "/auths/login",
-        credentials
-      );
-      if (!data.success) {
-        throw new Error(data.message);
-      }
-      return data.data;
-    } catch (error) {
-      if (axios.isAxiosError(error) && error.response?.data) {
-        throw new Error(error.response.data.message);
-      }
-      throw error;
+    const { data } = await api.post<ApiResponse<AuthResponseData>>(
+      "/auths/login",
+      credentials
+    );
+    if (!data.success) {
+      throw new Error(data.message);
     }
+    return data.data;
   },
 
   async register(credentials: RegisterCredentials): Promise<AuthResponseData> {
-    try {
-      const { data } = await api.post<ApiResponse<AuthResponseData>>(
-        "/auths/register",
-        credentials
-      );
-      if (!data.success) {
-        throw new Error(data.message);
-      }
-      return data.data;
-    } catch (error) {
-      if (axios.isAxiosError(error) && error.response?.data) {
-        throw new Error(error.response.data.message);
-      }
-      throw error;
+    const { data } = await api.post<ApiResponse<AuthResponseData>>(
+      "/auths/register",
+      credentials
+    );
+    if (!data.success) {
+      throw new Error(data.message);
     }
+    return data.data;
   },
 
   async getCurrentUser(): Promise<User> {
-    try {
-      const { data } = await api.get<ApiResponse<User>>("/auths/me");
-      if (!data.success) {
-        throw new Error(data.message);
-      }
-      return data.data;
-    } catch (error) {
-      if (axios.isAxiosError(error) && error.response?.data) {
-        throw new Error(error.response.data.message);
-      }
-      throw error;
+    const { data } = await api.get<ApiResponse<User>>("/auths/me");
+    if (!data.success) {
+      throw new Error(data.message);
     }
+    return data.data;
   },
 };
